@@ -30,6 +30,7 @@ func (p *EventsProcessor) StartWatchers(ctx context.Context, watchers []watcher.
 			llogger.WithError(err).Error("failed to watch watch")
 			return
 		}
+		defer watch.Stop()
 
 		for {
 			select {
