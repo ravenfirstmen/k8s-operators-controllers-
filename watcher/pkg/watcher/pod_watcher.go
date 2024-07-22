@@ -46,7 +46,7 @@ func (p *PodWatcher) Process(ctx context.Context, event watch.Event) error {
 	logger := p.logger.
 		WithContext(ctx).
 		WithFields(logrus.Fields{
-			"watcher":    "PodWatcher",
+			"watcher":    p.Name(),
 			"object":     pod.Name,
 			"event type": event.Type,
 		})

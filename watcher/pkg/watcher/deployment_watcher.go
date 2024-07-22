@@ -47,7 +47,7 @@ func (d *DeploymentWatcher) Process(ctx context.Context, event watch.Event) erro
 	logger := d.logger.
 		WithContext(ctx).
 		WithFields(logrus.Fields{
-			"watcher":    "DeploymentWatcher",
+			"watcher":    d.Name(),
 			"object":     dep.Name,
 			"event type": event.Type,
 		})
