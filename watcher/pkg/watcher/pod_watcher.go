@@ -54,6 +54,7 @@ func (p *PodWatcher) Process(ctx context.Context, event watch.Event) error {
 	switch event.Type {
 	case watch.Added:
 		logger.Info("pod added")
+		p.annotate(ctx, pod)
 		break
 	case watch.Modified:
 		logger.Info("pod modified")
@@ -76,4 +77,28 @@ func (p *PodWatcher) Done(ctx context.Context) <-chan bool {
 func (p *PodWatcher) Stop(ctx context.Context) error {
 	p.done <- true
 	return nil
+}
+
+func (p *PodWatcher) annotate(ctx context.Context, pod *v1.Pod) {
+	logger := p.logger.
+		WithContext(ctx).
+		WithFields(logrus.Fields{
+			"pod": pod.Name,
+		})
+	if pod.Annotations == nil {
+		logger.Info("not annotated pod")
+		pod.Annotations = make(map[string]string)
+	}
+	if _, exists := pod.Annotations["annotated"]; !exists {
+		logger.Info("not annotated pod")
+		pod.Annotations["annotated"] = "True"
+		_, err := p.clientSet.CoreV1().Pods(pod.Namespace).Update(ctx, pod, metav1.UpdateOptions{})
+		if err != nil {
+			logger.WithError(err).Error("error annotating pod")
+			return
+		}
+		logger.Info("pod annotated")
+		return
+	}
+	logger.Info("pod was annotated previously")
 }
