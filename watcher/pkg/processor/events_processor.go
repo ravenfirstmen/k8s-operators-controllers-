@@ -24,10 +24,10 @@ func (p *EventsProcessor) StartWatchers(ctx context.Context, watchers []watcher.
 	listener := func(wg *sync.WaitGroup, ctx context.Context, watcher watcher.Watcher) {
 		defer wg.Done()
 
-		llogger := logger.WithContext(ctx)
+		logger := logger.WithContext(ctx)
 		watch, err := watcher.Watch(ctx)
 		if err != nil {
-			llogger.WithError(err).Error("failed to watch watch")
+			logger.WithError(err).Error("failed to watch watch")
 			return
 		}
 		defer watch.Stop()
@@ -37,13 +37,13 @@ func (p *EventsProcessor) StartWatchers(ctx context.Context, watchers []watcher.
 			case event := <-watch.ResultChan():
 				err := watcher.Process(ctx, event)
 				if err != nil {
-					llogger.WithError(err).Error("failed to process watch")
+					logger.WithError(err).Error("failed to process watch")
 					return
 				}
 				break
 			case done := <-watcher.Done(ctx):
 				if done {
-					llogger.Infof("stopping watcher %s", watcher.Name())
+					logger.Infof("stopping watcher %s", watcher.Name())
 					return
 				}
 				break
