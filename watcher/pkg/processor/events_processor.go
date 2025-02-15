@@ -34,7 +34,11 @@ func (p *EventsProcessor) StartWatchers(ctx context.Context, watchers []watcher.
 
 		for {
 			select {
-			case event := <-watch.ResultChan():
+			case event, isOpen := <-watch.ResultChan():
+				if !isOpen {
+					logger.Error("the channel is unexpected closed")
+					return
+				}
 				err := watcher.Process(ctx, event)
 				if err != nil {
 					logger.WithError(err).Error("failed to process watch")
